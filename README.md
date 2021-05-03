@@ -23,9 +23,9 @@ To know more about International Arrival Statistics in Vanuatu. Click [Here](htt
     * Blog on RAP [here](https://dataingovernment.blog.gov.uk/2017/03/27/reproducible-analytical-pipeline/)
     * Video of Reproducible analysis using R [here](https://www.youtube.com/watch?v=qvPDE4ppAns) 
 
-- [Introduction to International Merchandise Trade Statistics](https://www.oecd.org/sdd/its/international-merchandise-trade-statistics.htm)
-    * Free international merchandise trade Course [here](https://www.unsdglearn.org/courses/e-learning-on-international-merchandise-trade-statistics/) 
-    * United Nations Trade Statistics [here](https://unstats.un.org/unsd/trade/default.asp)
-    * Video by the World Trade Organisation using R [here](https://www.youtube.com/watch?v=kHQJkeOxAKM) 
+- [Introduction to International Visitors Arrival Statistics](https://www.spc.int)
+    * World Tourism Data [here](https://data.worldbank.org/indicator/ST.INT.ARVL?locations=VU)
+    * United Nations Trade Statistics [here](https://www.unwto.org/unwto-tourism-dashboard)
+    * Video [here](https://www.youtube.com/watch?v=BZO9ieVZAoY)
 
 ![The new Reproducible Analytical Pipeline](images/NewPipeline.png)
