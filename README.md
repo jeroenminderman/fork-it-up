@@ -17,7 +17,7 @@ All International arrival and departure statistics by air provided in this repor
 
 To know more about International Arrival Statistics in Vanuatu. Click [Here](https://vnso.gov.vu/index.php/en/statistics-by-topic/tourism)
 
-## Resources list
+## List of Resources
 - [Introduction to Reproducible Analytical Pipelines](https://ukgovdatascience.github.io/rap_companion/)
     * Free RAP Course [here](https://www.udemy.com/course/reproducible-analytical-pipelines/) 
     * Blog on RAP [here](https://dataingovernment.blog.gov.uk/2017/03/27/reproducible-analytical-pipeline/)
@@ -25,7 +25,7 @@ To know more about International Arrival Statistics in Vanuatu. Click [Here](htt
 
 - [Introduction to International Visitors Arrival Statistics](https://www.spc.int)
     * World Tourism Data [here](https://data.worldbank.org/indicator/ST.INT.ARVL?locations=VU)
-    * United Nations Trade Statistics [here](https://www.unwto.org/unwto-tourism-dashboard)
+    * United Nations Tourism Statistics [here](https://www.unwto.org/unwto-tourism-dashboard)
     * Video [here](https://www.youtube.com/watch?v=BZO9ieVZAoY)
 
 ![The new Reproducible Analytical Pipeline](images/NewPipeline.png)
