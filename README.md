@@ -25,7 +25,7 @@ To know more about International Arrival Statistics in Vanuatu. Click [Here](htt
 
 - [Introduction to International Visitors Arrival Statistics](https://www.spc.int)
     * World Tourism Data [here](https://data.worldbank.org/indicator/ST.INT.ARVL?locations=VU)
-    * United Nations Trade Statistics [here](https://www.unwto.org/unwto-tourism-dashboard)
+    * United Nations Tourism Statistics [here](https://www.unwto.org/unwto-tourism-dashboard)
     * Video [here](https://www.youtube.com/watch?v=BZO9ieVZAoY)
 
 ![The new Reproducible Analytical Pipeline](images/NewPipeline.png)
