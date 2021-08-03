@@ -33,72 +33,66 @@ CountryCodesVisitors <- read.csv(CountryCodesByVisitors, header = TRUE, na.strin
 CountryCodesByResidents <- file.path(openDataFolder, "CountryCodes_ResbyNat.csv")
 CountryCodesResidents <- read.csv(CountryCodesByResidents, header = TRUE, na.strings = c("","NA","NULL","null"))
 
+TravelPurposeByCodes <-file.path(openDataFolder, "PurposeOfVisitCodes.csv")
+TravelPurposeCodes <- read.csv(TravelPurposeByCodes, header = TRUE, na.strings = c("", "NA","NULL","null"))
+
+#### Merge classifications table with the tourism dataset ####
+# Fill NA in POV with "Returning Residents" #
+MergedResidentsClassifications <- merge(tourismStats, CountryCodesResidents, by="COUNTRY.OF.RESIDENCE", all.x=TRUE)
+MergedFinalTourism <- merge(MergedResidentsClassifications, CountryCodesVisitors, by="COUNTRY.OF.RESIDENCE", all.x=TRUE)
+MergedFinalTourism$TravelPurpose[which(is.na(MergedFinalTourism$TravelPurpose))] <- "6. Returning Residents"
+TourismFINAL <- merge(MergedFinalTourism, TravelPurposeCodes, by="TravelPurpose", all.x=TRUE)
+
 ## Replaces all missing values to NA, NULL, null
 ## TourismStats <- read.csv(tourismStatsFile, Header = TRUE, na.strings=c ("","NA","NULL", "null"))
 
 # count the missing values
-numberMissing <- apply(tourismStats, MARGIN=2,
+numberMissing <- apply(TourismFINAL, MARGIN=2,
                        FUN=function(columnValues){
                          return(sum(is.na(columnValues)))
                        })
 
-View(numberMissing)
-
 # Remove duplicated rows from the tourism statistics data
 
-duplicatedRows <- duplicated(tourismStats) 
-TourismStatsNoDup <- tourismStats[duplicatedRows == FALSE, ]
-
-#### Merge classifications table with the tourism dataset ####
-MergedResidentsClassifications <- merge(tourismStats, CountryCodesResidents, by="COUNTRY.OF.RESIDENCE", all.x=TRUE)
-MergedFinalTourism <- merge(MergedResidentsClassifications, CountryCodesVisitors, by="COUNTRY.OF.RESIDENCE", all.x=TRUE)
-
-View(MergedFinalTourism)
-
-
-
+duplicatedRows <- duplicated(TourismFINAL) 
+TourismFINALNoDups <- TourismFINAL[duplicatedRows == FALSE, ]
 
 ## CALCULATE THE AGE ##
 # Take two dates and differentiate from one another
 
-str(MergedFinalTourism$FLIGHT.DATE)
-str(MergedFinalTourism$BIRTHDATE)
+str(TourismFINAL$FLIGHT.DATE)
+str(TourismFINAL$BIRTHDATE)
 
 # Change date formats from character to Dates
-MergedFinalTourism$FLIGHT.DATE <- as.Date(MergedFinalTourism$FLIGHT.DATE)
-MergedFinalTourism$BIRTHDATE <- as.Date(MergedFinalTourism$BIRTHDATE)
+TourismFINAL$FLIGHT.DATE <- as.Date(TourismFINAL$FLIGHT.DATE)
+TourismFINAL$BIRTHDATE <- as.Date(TourismFINAL$BIRTHDATE)
 
 # Check structure after changing formats
-str(MergedFinalTourism$FLIGHT.DATE)
-str(MergedFinalTourism$BIRTHDATE)
+str(TourismFINAL$FLIGHT.DATE)
+str(TourismFINAL$BIRTHDATE)
 
-### Calculate Age ###
-MergedFinalTourism$AGE <- as.numeric(difftime(MergedFinalTourism$FLIGHT.DATE, MergedFinalTourism$BIRTHDATE, unit = "weeks"))/52.25
+### CALCULATE AGE ###
+TourismFINAL$AGE <- as.numeric(difftime(TourismFINAL$FLIGHT.DATE, TourismFINAL$BIRTHDATE, unit = "weeks"))/52.25
 
 # Round of Age to no decimal place
-MergedFinalTourism$AGE = round(MergedFinalTourism$AGE, digits = 0)
-
-View(MergedFinalTourism)
+TourismFINAL$AGE = round(TourismFINAL$AGE, digits = 0)
 
 ### Calculate LOS ###
+TourismFINAL$INTENDED.DEP.DATE <- as.Date((TourismFINAL$INTENDED.DEP.DATE))
+TourismFINAL$LENGTH.OF.STAY <- as.numeric(TourismFINAL$INTENDED.DEP.DATE - TourismFINAL$FLIGHT.DATE, unit = "days")
 
-MergedFinalTourism$INTENDED.DEP.DATE <- as.Date((MergedFinalTourism$INTENDED.DEP.DATE))
-MergedFinalTourism$LENGTH.OF.STAY <- as.numeric(MergedFinalTourism$INTENDED.DEP.DATE - MergedFinalTourism$FLIGHT.DATE, unit = "days")
+TourismFINAL$INTENDED.DEP.DATE = round(TourismFINAL$INTENDED.DEP.DATE, digits = 0)
 
-MergedFinalTourism$INTENDED.DEP.DATE = round(MergedFinalTourism$INTENDED.DEP.DATE, digits = 0)
-
-View(MergedFinalTourism)
 
 ### Rename Travel Purpose without codes ###
-# Fill NA in POV with "Returning Residents" #
 
-str(MergedFinalTourism$TravelPurpose)
 
-MergedFinalTourism$TravelPurpose[which(is.na(MergedFinalTourism$TravelPurpose))] <- "6. Returning Residents"
+str(TourismFINAL$TravelPurpose)
+
 
 # Table 1: Summary of overseas Migration
 
-Tab1_Summary <- MergedFinalTourism %>%
+Tab1_Summary <- TourismFINAL %>%
   group_by(PORT,ARR.DEPART,TravelPurpose) %>%
   count()
 
