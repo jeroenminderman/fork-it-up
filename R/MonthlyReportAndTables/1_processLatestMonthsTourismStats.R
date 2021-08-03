@@ -83,39 +83,18 @@ TourismFINAL$LENGTH.OF.STAY <- as.numeric(TourismFINAL$INTENDED.DEP.DATE - Touri
 
 TourismFINAL$INTENDED.DEP.DATE = round(TourismFINAL$INTENDED.DEP.DATE, digits = 0)
 
-
-### Rename Travel Purpose without codes ###
-
-
 str(TourismFINAL$TravelPurpose)
 
 
 # Table 1: Summary of overseas Migration
 
-Tab1_Summary <- TourismFINAL %>%
-  group_by(PORT,ARR.DEPART,TravelPurpose) %>%
+Tab1_VILA <- TourismFINAL %>%
+  group_by(PORT,ARR.DEPART,VisitorResident) %>%
+  filter(PORT %in% c("VAIRP","VAIR","SAIRP","SAIR")) %>%
   count()
 
 
-# Table 2: Purpose of Visit
 
-tradeStatsSubset <- tradeStatsNoBanknotes[tradeStatsNoBanknotes$Type %in% c("EX / 1","EX / 3", "IM / 4", "IM / 7", "PC / 4"), ]
-tradeStatsCommodities <- tradeStatsSubset[tradeStatsSubset$CP4 %in% c(1000, 3071, 4000, 4071, 7100), ]
-
-PortSubset <- MergedFinalTourism[]
-Tab2_POV <- MergedFinalTourism %>%
-  filter(%in% c (PORT == "VAIRP", ARR.DEPART == "ARRIVAL") %>%
-  group_by(PORT,TravelPurpose) %>%
-  count()
-
-write.csv("Tab2_POV.csv")
-
-
-# Table 3: Country of Usual Residence
-
-# Table 4: Residents arrival by Nationality
-
-# Table 5: 
 
 
 
