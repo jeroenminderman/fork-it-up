@@ -6,6 +6,6 @@ TravelPurpose,VisitorResident
 3. HOLIDAY,Visitor
 4. BUSINESS/OFFICIAL,Visitor
 5. Intending Resident,Resident
-6.Returning Residents,Resident
+6. Returning Residents,Resident
 7. OTHER,Visitor
 9. Education,Visitor
