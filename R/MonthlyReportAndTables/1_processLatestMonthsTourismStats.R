@@ -43,7 +43,7 @@ MergedFinalTourism <- merge(MergedResidentsClassifications, CountryCodesVisitors
 MergedFinalTourism$TravelPurpose[which(is.na(MergedFinalTourism$TravelPurpose))] <- "6. Returning Residents"
 TourismFINAL <- merge(MergedFinalTourism, TravelPurposeCodes, by="TravelPurpose", all.x=TRUE)
 
-## Replaces all missing values to NA, NULL, null
+#### Data Cleaning (Missing Values, Duplicates) ####
 ## TourismStats <- read.csv(tourismStatsFile, Header = TRUE, na.strings=c ("","NA","NULL", "null"))
 
 # count the missing values
@@ -57,7 +57,7 @@ numberMissing <- apply(TourismFINAL, MARGIN=2,
 duplicatedRows <- duplicated(TourismFINAL) 
 TourismFINALNoDups <- TourismFINAL[duplicatedRows == FALSE, ]
 
-## CALCULATE THE AGE ##
+#### CALCULATE THE AGE ####
 # Take two dates and differentiate from one another
 
 str(TourismFINAL$FLIGHT.DATE)
@@ -77,24 +77,33 @@ TourismFINAL$AGE <- as.numeric(difftime(TourismFINAL$FLIGHT.DATE, TourismFINAL$B
 # Round of Age to no decimal place
 TourismFINAL$AGE = round(TourismFINAL$AGE, digits = 0)
 
-### Calculate LOS ###
+#### Calculate LOS ####
 TourismFINAL$INTENDED.DEP.DATE <- as.Date((TourismFINAL$INTENDED.DEP.DATE))
 TourismFINAL$LENGTH.OF.STAY <- as.numeric(TourismFINAL$INTENDED.DEP.DATE - TourismFINAL$FLIGHT.DATE, unit = "days")
 
 TourismFINAL$INTENDED.DEP.DATE = round(TourismFINAL$INTENDED.DEP.DATE, digits = 0)
 
-str(TourismFINAL$TravelPurpose)
-
-
-# Table 1: Summary of overseas Migration
+#### Table 1: Summary of overseas Migration ####
 
 Tab1_VILA <- TourismFINAL %>%
   group_by(PORT,ARR.DEPART,VisitorResident) %>%
   filter(PORT %in% c("VAIRP","VAIR","SAIRP","SAIR")) %>%
   count()
 
+#### Table 2: Purpose of Visit ####
 
+Tab2_POV <- TourismFINAL %>%
+  group_by(TravelPurpose, VisitorResident) %>%
+  filter(VisitorResident %in% c("Visitor")) %>%
+  count()
 
+#### Table 3: Country of Usual Residence ####
+
+#### Table 4: Residents arrival by Nationality ####
+
+#### Table 5: Average LOS ####
+
+#### Table 6: Average Age ####
 
 
 
