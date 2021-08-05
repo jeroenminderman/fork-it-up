@@ -83,8 +83,12 @@ TourismFINAL$LENGTH.OF.STAY <- as.numeric(TourismFINAL$INTENDED.DEP.DATE - Touri
 
 TourismFINAL$INTENDED.DEP.DATE = round(TourismFINAL$INTENDED.DEP.DATE, digits = 0)
 
-
 #### Table 1: Summary of overseas Migration ####
+
+Tab1_VILA <- TourismFINAL %>%
+  group_by(PORT,ARR.DEPART,VisitorResident) %>%
+  filter(PORT %in% c("VAIRP","VAIR","SAIRP","SAIR")) %>%
+  count()
 
 #### Table 2: Purpose of Visit ####
 
@@ -92,7 +96,6 @@ Tab2_POV <- TourismFINAL %>%
   group_by(TravelPurpose, VisitorResident) %>%
   filter(VisitorResident %in% c("Visitor")) %>%
   count()
-
 
 #### Table 3: Country of Usual Residence ####
 
