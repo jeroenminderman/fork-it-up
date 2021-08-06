@@ -85,16 +85,27 @@ TourismFINAL$INTENDED.DEP.DATE = round(TourismFINAL$INTENDED.DEP.DATE, digits = 
 
 str(TourismFINAL$TravelPurpose)
 
+#### TABULATIONS ####
 
 # Table 1: Summary of overseas Migration
 
-Tab1_VILA <- TourismFINAL %>%
+Tab1_Summary<- TourismFINAL %>%
   group_by(PORT,ARR.DEPART,VisitorResident) %>%
   filter(PORT %in% c("VAIRP","VAIR","SAIRP","SAIR")) %>%
   count()
 
+# Table 4: Summary of Residents by Nationality
 
+Tab4_ResByNat<- TourismFINAL %>%
+  group_by(PORT,RESIDENTS.BY.REGION) %>%
+  filter(VisitorResident == "Resident", ARR.DEPART == 'ARRIVAL',PORT %in% c("VAIRP","VAIR","SAIRP","SAIR")) %>%
+  count()
 
+# Table x: Passengers by Gender
+TabSex <- TourismFINAL %>%
+  group_by(PORT,GENDER, VisitorResident) %>%
+  filter(ARR.DEPART == 'ARRIVAL',PORT %in% c("VAIRP","VAIR","SAIRP","SAIR")) %>%
+  count()
 
 
 
