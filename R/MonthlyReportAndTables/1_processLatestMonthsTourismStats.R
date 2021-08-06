@@ -64,8 +64,8 @@ str(TourismFINAL$FLIGHT.DATE)
 str(TourismFINAL$BIRTHDATE)
 
 # Change date formats from character to Dates
-TourismFINAL$FLIGHT.DATE <- as.Date(TourismFINAL$FLIGHT.DATE)
-TourismFINAL$BIRTHDATE <- as.Date(TourismFINAL$BIRTHDATE)
+TourismFINAL$FLIGHT.DATE <- as.Date(TourismFINAL$FLIGHT.DATE, format = "%d/%m/%Y")
+TourismFINAL$BIRTHDATE <- as.Date(TourismFINAL$BIRTHDATE, format = "%d/%m/%Y")
 
 # Check structure after changing formats
 str(TourismFINAL$FLIGHT.DATE)
