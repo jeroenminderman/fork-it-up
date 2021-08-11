@@ -98,6 +98,15 @@ Tab2_POV <- TourismFINAL %>%
   count()
 
 #### Table 3: Country of Usual Residence ####
+Tab3_VistorsCUR <- TourismFINAL %>%
+group_by(PORT,ARR.DEPART,GROUP,VisitorResident) %>%
+  filter(PORT %in% c("SAIR","SAIRP","VAIR","VAIRP"))%>%
+  filter(VisitorResident %in%("Visitor"))%>%
+  filter(ARR.DEPART %in%("ARRIVAL"))%>%
+  count()
+  
+
+
 
 #### Table 4: Residents arrival by Nationality ####
 Tab4_ResByNat<- TourismFINAL %>%
