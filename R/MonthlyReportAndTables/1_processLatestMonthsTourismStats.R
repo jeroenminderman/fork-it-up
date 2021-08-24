@@ -154,6 +154,8 @@ Vanuatu <- data.frame(Towns,AVG_LengthOfStay)
 Tab5_AVGLOS <- rbind(AVG_LOS_VUV,Vanuatu)
 
 
+
+
 #### Table 6: Average Age ####
 
 
