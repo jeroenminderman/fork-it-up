@@ -1,11 +1,11 @@
-TravelPurpose,VisitorResident
-1. STOP OVER,Visitor
-10. Sports,Visitor
-11. CONFERENCE/CONVENTION,Visitor
-2. Visiting Friends and relatives,Visitor
-3. HOLIDAY,Visitor
-4. BUSINESS/OFFICIAL,Visitor
-5. Intending Resident,Resident
-6. Returning Residents,Resident
-7. OTHER,Visitor
-9. Education,Visitor
+TravelPurpose,TravelPurposeClassifications,VisitorResident
+1. STOP OVER,Stop over,Visitor
+10. Sports,Sports,Visitor
+11. CONFERENCE/CONVENTION,Conference/Convention,Visitor
+2. Visiting Friends and relatives,Visitings Friends and relatives,Visitor
+3. HOLIDAY,Holiday,Visitor
+4. BUSINESS/OFFICIAL,Business/Official,Visitor
+5. Intending Resident,Intending Resident,Resident
+6. Returning Residents,Returning Resident,Resident
+7. OTHER,Others,Visitor
+9. Education,Education,Visitor
