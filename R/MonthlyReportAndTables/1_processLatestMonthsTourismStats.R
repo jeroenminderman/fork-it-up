@@ -160,9 +160,11 @@ Tab5_AVGLOS <- rbind(AVG_LOS_VUV,Vanuatu)
 
 
 
-
 #### Table 6: Average Age ####
 
+#### Table 7: Visitors travelling to outer islands ####
+
+#### Table 8: Visitors usual residence arrivals by Purpose of Visit ####
 
 
 
