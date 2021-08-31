@@ -169,18 +169,17 @@ Tab5_AVGLOS <- rbind(AVG_LOS_VUV,Vanuatu)
 
 
 #### Table 6: Average Age ####
-<<<<<<< HEAD
 
-#### Table 7: Visitors travelling to outer islands ####
-
-#### Table 8: Visitors usual residence arrivals by Purpose of Visit ####
-=======
 Tab6_AverageAge <- TourismFINAL %>%
   filter(VisitorResident == "Visitor") %>%
   filter(PORT %in% c("VAIR","VAIRP", "SAIR", "SAIRP")) %>%
   group_by(PORT) %>% 
   summarise(total= mean(AGE))
->>>>>>> 3ab014152dff13fcc6b70ae0858fb3de4e876a6a
+
+#### Table 7: Visitors travelling to outer islands ####
+
+#### Table 8: Visitors usual residence arrivals by Purpose of Visit ####
+
 
 
 
