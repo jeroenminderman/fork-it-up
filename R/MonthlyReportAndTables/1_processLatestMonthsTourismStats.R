@@ -97,6 +97,8 @@ Tab2_POV <- TourismFINAL %>%
   filter(VisitorResident %in% c("Visitor")) %>%
   count()
 
+write.csv(Tab2_POV, file = "Tab 2_Purpose of Visit")
+
 #### Table 3: Country of Usual Residence ####
 
 #### Table 4: Residents arrival by Nationality ####
