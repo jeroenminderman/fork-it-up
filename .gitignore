@@ -37,3 +37,27 @@ vignettes/*.pdf
 
 # R Environment Variables
 .Renviron
+
+# Set up ignore for data folder
+data/secure/* 
+!data/secure/README.md 
+
+# Ignore any Rmarkdown outputs
+*.html
+*.pdf
+*.pptx
+*.docx
+
+# Keep the powerpoint for mapping analytical pipeline
+!images/MappingTheProcess_15-12-20.pptx
+
+# Keep the monthly report styles template
+!R/MonthlyReportAndTables/styles_reference.docx
+
+# Ignore files in the outputs folder for the moment
+outputs/*
+!outputs/README.md
+
+# Ignore temporal files produced by excel
+data/open/$*
+outputs/$*
