@@ -1,9 +1,9 @@
-"","TravelPurpose","VisitorResident","n"
-"1","1. STOP OVER","Visitor",206
-"2","10. Sports","Visitor",4
-"3","11. CONFERENCE/CONVENTION","Visitor",204
-"4","2. Visiting Friends and relatives","Visitor",1079
-"5","3. HOLIDAY","Visitor",10779
-"6","4. BUSINESS/OFFICIAL","Visitor",320
-"7","7. OTHER","Visitor",563
-"8","9. Education","Visitor",67
+"","TravelPurposeClassifications","VisitorResident","n"
+"1","Business/Official","Visitor",320
+"2","Conference/Convention","Visitor",204
+"3","Education","Visitor",67
+"4","Holiday","Visitor",10779
+"5","Others","Visitor",563
+"6","Sports","Visitor",4
+"7","Stop over","Visitor",206
+"8","Visitings Friends and relatives","Visitor",1079

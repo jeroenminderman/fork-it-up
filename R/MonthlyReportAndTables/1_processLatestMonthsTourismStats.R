@@ -36,6 +36,12 @@ CountryCodesResidents <- read.csv(CountryCodesByResidents, header = TRUE, na.str
 TravelPurposeByCodes <-file.path(openDataFolder, "PurposeOfVisitCodes.csv")
 TravelPurposeCodes <- read.csv(TravelPurposeByCodes, header = TRUE, na.strings = c("", "NA","NULL","null"))
 
+OuterIslandByCodes <- file.path(openDataFolder, "tblIsland.csv")
+OuterIslandCodes <- read.csv(OuterIslandByCodes, header = TRUE, na.strings = c("", "NA","NULL","null"))
+
+VisitorOuterIsland <- file.path(openDataFolder, "Departure_OuterIslands.csv")
+VisitorsOuterIslandComplete <- read.csv(VisitorOuterIsland, header = TRUE, na.strings = c("", "NA","NULL","null"))
+
 #### Merge classifications table with the tourism dataset ####
 # Fill NA in POV with "Returning Residents" #
 MergedResidentsClassifications <- merge(tourismStats, CountryCodesResidents, by="COUNTRY.OF.RESIDENCE", all.x=TRUE)
@@ -45,6 +51,9 @@ str(MergedFinalTourism$TravelPurpose)
 MergedFinalTourism$TravelPurpose <- as.character(MergedFinalTourism$TravelPurpose)
 MergedFinalTourism$TravelPurpose[which(is.na(MergedFinalTourism$TravelPurpose))] <- "6. Returning Residents"
 TourismFINAL <- merge(MergedFinalTourism, TravelPurposeCodes, by="TravelPurpose", all.x=TRUE)
+
+MergeOuterIslandCodes <- merge(OuterIslandCodes, VisitorsOuterIslandComplete, by="IslandName", all.x = TRUE)
+
 
 #### Data Cleaning (Missing Values, Duplicates) ####
 ## TourismStats <- read.csv(tourismStatsFile, Header = TRUE, na.strings=c ("","NA","NULL", "null"))
@@ -161,9 +170,21 @@ Vanuatu <- data.frame(Towns,AVG_LengthOfStay)
 Tab5_AVGLOS <- rbind(AVG_LOS_VUV,Vanuatu)
 
 
-
-
 #### Table 6: Average Age ####
+
+#### Table 7: Visitors to outer islands ####
+
+# create subset from Main dataset #
+
+DepartureSubset <-TourismFINAL[which(TourismFINAL$ARR.DEPART=="DEPARTURE"),]
+
+# Merge Outer Island into Departure Subset #
+FINALOuterIsland <- merge(MergeOuterIslandCodes,DepartureSubset, by="PASSPORT", all.x = TRUE )
+
+Tab7_VisitorOuterIsland <- FINALOuterIsland %>%
+  group_by(PORT, MainIsland) %>%
+  filter(PORT %in% c("VAIRP","VAIR","SAIRP","SAIR")) %>%
+  count()
 
 
 
