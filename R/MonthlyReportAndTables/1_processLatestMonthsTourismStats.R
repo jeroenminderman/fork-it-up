@@ -120,6 +120,14 @@ Tab2_POV <- TourismFINAL %>%
 write.csv(Tab2_POV, file = "Tab 2_Purpose of Visit")
 
 #### Table 3: Country of Usual Residence ####
+Tab3_VistorsCUR <- TourismFINAL %>%
+  filter(PORT %in% c("SAIR","SAIRP","VAIR","VAIRP"))%>%
+  filter(VisitorResident %in%("Visitor"))%>%
+  filter(ARR.DEPART %in%("ARRIVAL"))%>%
+  group_by(GROUP) %>%
+  count()
+  
+
 
 #### Table 4: Residents arrival by Nationality ####
 Tab4_ResByNat<- TourismFINAL %>%
@@ -169,8 +177,13 @@ Vanuatu <- data.frame(Towns,AVG_LengthOfStay)
 
 Tab5_AVGLOS <- rbind(AVG_LOS_VUV,Vanuatu)
 
-
 #### Table 6: Average Age ####
+
+Tab6_AverageAge <- TourismFINAL %>%
+  filter(VisitorResident == "Visitor") %>%
+  filter(PORT %in% c("VAIR","VAIRP", "SAIR", "SAIRP")) %>%
+  group_by(PORT) %>% 
+  summarise(total= mean(AGE))
 
 #### Table 7: Visitors to outer islands ####
 
@@ -185,6 +198,8 @@ Tab7_VisitorOuterIsland <- FINALOuterIsland %>%
   group_by(PORT, MainIsland) %>%
   filter(PORT %in% c("VAIRP","VAIR","SAIRP","SAIR")) %>%
   count()
+
+#### Table 8: Visitors usual residence arrivals by Purpose of Visit ####
 
 
 
