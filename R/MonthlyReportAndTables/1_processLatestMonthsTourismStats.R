@@ -125,56 +125,40 @@ Tab4_ResByNat<- TourismFINAL %>%
   count()
 
 
-#### Table 5: Average LOS ####
+#### Table 6: Average AGE ####
 
-str(TourismFINAL$LENGTH.OF.STAY)
+str(TourismFINAL$AGE)
 str(TourismFINAL$VisitorResident)
 
-visitors_data <- TourismFINAL %>%
+visitor_data_age <- TourismFINAL %>%
   filter(VisitorResident == "Visitor")
 
 
-# Identify when Visitors length of stay over 120 days and correct
-LOS_threshold <- 120
-visitors_data <- visitors_data %>%
-  mutate(visit_too_long = LENGTH.OF.STAY > LOS_threshold,
-         CORRECTED.LENGTH.OF.STAY = case_when(
-           LENGTH.OF.STAY > LOS_threshold ~ 120,
-           TRUE ~ LENGTH.OF.STAY
-         ))
-
-
-visitors_data <- visitors_data %>%
-  mutate(Towns = case_when(
-    grepl(pattern = "VAI", visitors_data$PORT) ~ "PORT VILA",
-    grepl(pattern = "SAI", visitors_data$PORT) ~ "LUGANVILLE"
+visitor_data_age <- visitor_data_age %>%
+  mutate(cities = case_when(
+    grepl(pattern = "VAI", visitor_data_age$PORT) ~ "PORT VILA",
+    grepl(pattern = "SAI", visitor_data_age$PORT) ~ "LUGANVILLE"
   )) 
 
 
-AVG_LOS_VUV <- visitors_data %>%
+AVG_AGE_VUV <- visitor_data_age %>%
   filter(ARR.DEPART == "ARRIVAL") %>%
-  filter(CORRECTED.LENGTH.OF.STAY != "NA") %>%
-  filter(Towns %in% c("PORT VILA", "LUGANVILLE")) %>%
-  group_by(Towns) %>%
-  summarise(AVG_LengthOfStay = round(mean(CORRECTED.LENGTH.OF.STAY), digits = 0)) 
+  filter(AGE != "NA") %>%
+  filter(cities %in% c("PORT VILA", "LUGANVILLE")) %>%
+  group_by(cities) %>%
+  summarise(AVG_AGE = round(mean(AGE), digits = 0)) 
 
-Vanuatu_LOS <- mean(AVG_LOS_VUV$AVG_LengthOfStay)
+Vanuatu_AGE <- mean(AVG_AGE_VUV$AVG_AGE)
 
-Towns <- "VANUATU"
-AVG_LengthOfStay <- 12
-Vanuatu <- data.frame(Towns,AVG_LengthOfStay)
+cities <- "VANUATU"
+AVG_AGE <- 38.5
+Vanuatu <- data.frame(cities, AVG_AGE)
 
-Tab5_AVGLOS <- rbind(AVG_LOS_VUV,Vanuatu)
-
-
+Tab6_AVGAGE <- rbind(AVG_AGE_VUV,Vanuatu)
 
 
-#### Table 6: Average Age ####
-Tab6_AverageAge <- TourismFINAL %>%
-  filter(VisitorResident == "Visitor") %>%
-  filter(PORT %in% c("VAIR","VAIRP", "SAIR", "SAIRP")) %>%
-  group_by(PORT) %>% 
-  summarise(total= mean(AGE))
+
+
 
 
 
