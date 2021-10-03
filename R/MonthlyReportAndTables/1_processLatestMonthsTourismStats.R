@@ -59,8 +59,6 @@ numberMissing <- apply(TourismFINAL, MARGIN=2,
                          return(sum(is.na(columnValues)))
                        })
 
-View(numberMissing)
-
 # Remove duplicated rows from the tourism statistics data
 
 duplicatedRows <- duplicated(TourismFINAL) 
@@ -229,7 +227,7 @@ UsualResByPOV_proportion <- UsualResByPOV2[, columns_of_interest]/UsualResByPOV2
 UsualResByPOV_percentage <- UsualResByPOV_proportion * 100
 
 #Note percentage columns in their name
-colnames(UsualResByPOV_percentage) <- paste(colnames(UsualResByPOV_percentage),"(Percentages)")
+colnames(UsualResByPOV_percentage) <- paste(colnames(UsualResByPOV_percentage),"(% share)")
 
 #Add percentage columns into main table
 UsualResByPOV_percentage <- cbind(UsualResByPOV2, UsualResByPOV_percentage)
@@ -248,7 +246,7 @@ columns_of_interest <- colnames(UsualResByPOV2)[
 for(travel_type_column in columns_of_interest){
   
   #create column name with percentage
-  travel_type_column_as_percentage <- paste(travel_type_column, "(Percentages)")
+  travel_type_column_as_percentage <- paste(travel_type_column, "(% share)")
  
   #get the counts for current travel type
   #Note use of "drop" - this extracts the values as a vector instead of a data.frame
@@ -265,23 +263,19 @@ for(travel_type_column in columns_of_interest){
   travel_type_percentages <- round(travel_type_percentages, digits = 0)
   
   #create column with combined value and percentage
-  Tab8_UsualResByPOV[, columns_of_interest] <- paste(
+  Tab8_UsualResByPOV[, travel_type_column_as_percentage] <- paste(
     travel_type_counts, "(", travel_type_percentages, "%)", sep = ""
   )
 }
 
 #Add a total column
-Tab8_UsualResByPOV$TOtal <- UsualResByPOV2$Total
+Tab8_UsualResByPOV$Total <- UsualResByPOV2$Total
 
 #Remove the percentages from final row
 
 number_rows <- nrow(Tab8_UsualResByPOV)
 Tab8_UsualResByPOV[number_rows,] <- UsualResByPOV2[number_rows, ]
-
+Tab8_UsualResByPOV <- Tab8_UsualResByPOV[ , c(1,5, 4, 3, 2, 6)]
 
 #write.csv(UsualResByPOV, file="Table_8.csv")
 
-#### Table 9: Visitors usual residence arrivals by Age categories ####
-
-### Categorize Ages
-### Cross tab using group by function
