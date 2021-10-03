@@ -5,8 +5,12 @@ rm(list = ls())
 
 # Load the required libraries
 #install.packages("dplyr")
+#install.packages("tidyr")
+#install.packages("janitor")
 library(dplyr) # Manipulating data
 library(openxlsx) # Reading and editing excel formatted files
+library(tidyr) # Reading for pivot wide function
+library(janitor) # Add totals row and column
 
 # Note where VNSO code/data is on current computer
 repository <- file.path(dirname(rstudioapi::getSourceEditorContext()$path), "..", "..")
@@ -64,8 +68,6 @@ numberMissing <- apply(TourismFINAL, MARGIN=2,
                          return(sum(is.na(columnValues)))
                        })
 
-View(numberMissing)
-
 # Remove duplicated rows from the tourism statistics data
 
 duplicatedRows <- duplicated(TourismFINAL) 
@@ -113,8 +115,9 @@ Tab1_VILA <- TourismFINAL %>%
 #### Table 2: Purpose of Visit ####
 
 Tab2_POV <- TourismFINAL %>%
-  group_by(TravelPurposeClassifications, VisitorResident) %>%
+  group_by(TravelPurposeClassifications) %>%
   filter(VisitorResident %in% c("Visitor")) %>%
+  filter (ARR.DEPART %in% c("ARRIVAL")) %>%
   count()
 
 write.csv(Tab2_POV, file = "Tab 2_Purpose of Visit")
@@ -184,6 +187,99 @@ Tab7_VisitorOuterIsland <- FINALOuterIsland %>%
 
 #### Table 8: Visitors usual residence arrivals by Purpose of Visit ####
 
+#grouping the purpose of visits
+POV_Tab8 <- TourismFINAL %>%
+  mutate( POV_Groups = case_when(
+    grepl(pattern = "Bus", TourismFINAL$TravelPurposeClassifications) ~ "Business",
+    grepl(pattern = "Conf", TourismFINAL$TravelPurposeClassifications) ~ "Business",
+    grepl(pattern = "Edu", TourismFINAL$TravelPurposeClassifications) ~ "All Other",
+    grepl(pattern = "Oth", TourismFINAL$TravelPurposeClassifications) ~ "All Other",
+    grepl(pattern = "Spo", TourismFINAL$TravelPurposeClassifications) ~ "All Other",
+    grepl(pattern = "Sto", TourismFINAL$TravelPurposeClassifications) ~ "All Other",
+    grepl(pattern = "Hol", TourismFINAL$TravelPurposeClassifications) ~ "Holiday",
+    grepl(pattern = "Vis", TourismFINAL$TravelPurposeClassifications) ~ "Visitings Friends and relatives"
+  )) 
+
+#creating the data frame comparing visitors country of usual residence by purpose of visit
+UsualResByPOV <- POV_Tab8 %>%
+  group_by(GROUP, POV_Groups) %>%
+  filter(VisitorResident %in% c("Visitor")) %>%
+  filter (ARR.DEPART %in% c("ARRIVAL")) %>%
+  count()
 
 
+#manipulating the above to a wider format
+UsualResByPOV2 <- UsualResByPOV %>%
+  pivot_wider (names_from = POV_Groups, values_from = n)
+
+### Add in total row and column ###
+#adding a total column
+
+UsualResByPOV2 <- UsualResByPOV2 %>%
+  adorn_totals("col")
+
+#adding a total row
+UsualResByPOV2 <- UsualResByPOV2 %>%
+  adorn_totals("row")
+
+##Percentage of Total Columns
+
+#Calculate Percentage of total
+n_cols <- ncol(UsualResByPOV2)
+columns_of_interest <- 2:(n_cols - 1) #ignores the first and last columns
+UsualResByPOV_proportion <- UsualResByPOV2[, columns_of_interest]/UsualResByPOV2$Total
+UsualResByPOV_percentage <- UsualResByPOV_proportion * 100
+
+#Note percentage columns in their name
+colnames(UsualResByPOV_percentage) <- paste(colnames(UsualResByPOV_percentage),"(% share)")
+
+#Add percentage columns into main table
+UsualResByPOV_percentage <- cbind(UsualResByPOV2, UsualResByPOV_percentage)
+
+##Combining Value and Percentage into one single column
+
+#Initialise a dataframe to store the combined values and percentages
+Tab8_UsualResByPOV <- data.frame("GROUP" = UsualResByPOV2$GROUP)
+
+#Note columns of interest
+columns_of_interest <- colnames(UsualResByPOV2)[
+  c(-1, -ncol(UsualResByPOV2))
+]
+
+#Add in each column with combined value and percentages
+for(travel_type_column in columns_of_interest){
+  
+  #create column name with percentage
+  travel_type_column_as_percentage <- paste(travel_type_column, "(% share)")
+ 
+  #get the counts for current travel type
+  #Note use of "drop" - this extracts the values as a vector instead of a data.frame
+  
+  travel_type_counts <- UsualResByPOV2 [, travel_type_column, drop = TRUE]
+ 
+  #get the counts as percentages
+  #Note use of "drop" - this extracts the values as a vector instead of a data.frame
+  
+  travel_type_percentages <- UsualResByPOV_percentage [,
+                                                       travel_type_column_as_percentage, drop = TRUE]
+  
+  #Round as percentages
+  travel_type_percentages <- round(travel_type_percentages, digits = 0)
+  
+  #create column with combined value and percentage
+  Tab8_UsualResByPOV[, travel_type_column_as_percentage] <- paste(
+    travel_type_counts, "(", travel_type_percentages, "%)", sep = ""
+  )
+}
+
+#Add a total column
+Tab8_UsualResByPOV$Total <- UsualResByPOV2$Total
+
+#Remove the percentages from final row
+
+number_rows <- nrow(Tab8_UsualResByPOV)
+Tab8_UsualResByPOV[number_rows,] <- UsualResByPOV2[number_rows, ]
+Tab8_UsualResByPOV <- Tab8_UsualResByPOV[ , c(1,5, 4, 3, 2, 6)]
+
+#write.csv(UsualResByPOV, file="Table_8.csv")
 
