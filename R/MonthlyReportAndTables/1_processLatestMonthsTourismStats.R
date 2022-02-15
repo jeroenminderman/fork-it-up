@@ -138,6 +138,47 @@ Tab4_ResByNat<- TourismFINAL %>%
   filter(VisitorResident == "Resident", ARR.DEPART == 'ARRIVAL',PORT %in% c("VAIRP","VAIR","SAIRP","SAIR")) %>%
   count()
 
+#### Table 5: Average LOS ####
+
+str(TourismFINAL$LENGTH.OF.STAY)
+str(TourismFINAL$VisitorResident)
+
+visitors_data <- TourismFINAL %>%
+  filter(VisitorResident == "Visitor")
+
+
+# Identify when Visitors length of stay over 120 days and correct
+LOS_threshold <- 120
+visitors_data <- visitors_data %>%
+  mutate(visit_too_long = LENGTH.OF.STAY > LOS_threshold,
+         CORRECTED.LENGTH.OF.STAY = case_when(
+           LENGTH.OF.STAY > LOS_threshold ~ 120,
+           TRUE ~ LENGTH.OF.STAY
+         ))
+
+
+visitors_data <- visitors_data %>%
+  mutate(Towns = case_when(
+    grepl(pattern = "VAI", visitors_data$PORT) ~ "PORT VILA",
+    grepl(pattern = "SAI", visitors_data$PORT) ~ "LUGANVILLE"
+  )) 
+
+
+AVG_LOS_VUV <- visitors_data %>%
+  filter(ARR.DEPART == "ARRIVAL") %>%
+  filter(CORRECTED.LENGTH.OF.STAY != "NA") %>%
+  filter(Towns %in% c("PORT VILA", "LUGANVILLE")) %>%
+  group_by(Towns) %>%
+  summarise(AVG_LengthOfStay = round(mean(CORRECTED.LENGTH.OF.STAY), digits = 0)) 
+
+Vanuatu_LOS <- mean(AVG_LOS_VUV$AVG_LengthOfStay)
+
+Towns <- "VANUATU"
+AVG_LengthOfStay <- 12
+Vanuatu <- data.frame(Towns,AVG_LengthOfStay)
+
+Tab5_AVGLOS <- rbind(AVG_LOS_VUV,Vanuatu)
+
 
 #### Table 6: Average AGE ####
 
@@ -283,3 +324,4 @@ Tab8_UsualResByPOV <- Tab8_UsualResByPOV[ , c(1,5, 4, 3, 2, 6)]
 
 #write.csv(UsualResByPOV, file="Table_8.csv")
 
+#### END ####
