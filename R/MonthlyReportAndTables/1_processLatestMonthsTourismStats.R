@@ -67,6 +67,17 @@ numberMissing <- apply(TourismFINAL, MARGIN=2,
                        FUN=function(columnValues){
                          return(sum(is.na(columnValues)))
                        })
+numberMissing
+
+
+# Convert the counts to a proportion
+proportionMissing <- numberMissing / nrow(TourismFINAL)
+
+# Check for columns with high amounts of NA values
+colsWithManyMissingValues <- names(proportionMissing)[proportionMissing > 0.1]
+for(column in colsWithManyMissingValues){
+  warning(paste0("Large amounts of missing data identified in \"", column, "\" column. View with: \n\tView(TourismFINAL[is.na(TourismFINAL[, \"",  column, "\"]), ])"))
+}
 
 # Remove duplicated rows from the tourism statistics data
 
@@ -75,7 +86,7 @@ TourismFINALNoDups <- TourismFINAL[duplicatedRows == FALSE, ]
 
 #### CALCULATE THE AGE ####
 # Take two dates and differentiate from one another
-
+TourismFINAL<- tourismStats
 str(TourismFINAL$FLIGHT.DATE)
 str(TourismFINAL$BIRTHDATE)
 
@@ -99,10 +110,14 @@ TourismFINAL$AGE <- as.numeric(difftime(TourismFINAL$FLIGHT.DATE, TourismFINAL$B
 # Round of Age to no decimal place
 TourismFINAL$AGE = round(TourismFINAL$AGE, digits = 0)
 
+TourismFINAL$AGE<- trunc(TourismFINAL$AGE)
+
+
+
+
 #### Calculate LOS ####
 TourismFINAL$INTENDED.DEP.DATE <- as.Date(TourismFINAL$INTENDED.DEP.DATE,  format = "%d/%m/%Y")
 TourismFINAL$LENGTH.OF.STAY <- as.numeric(TourismFINAL$INTENDED.DEP.DATE - TourismFINAL$FLIGHT.DATE, unit = "days")
-
 TourismFINAL$INTENDED.DEP.DATE = round(TourismFINAL$INTENDED.DEP.DATE, digits = 0)
 
 #### Table 1: Summary of overseas Migration ####
@@ -134,7 +149,7 @@ Tab3_VistorsCUR <- TourismFINAL %>%
 
 #### Table 4: Residents arrival by Nationality ####
 Tab4_ResByNat<- TourismFINAL %>%
-  group_by(PORT,RESIDENTS.BY.REGION) %>%
+  group_by(RESIDENTS.BY.REGION) %>%
   filter(VisitorResident == "Resident", ARR.DEPART == 'ARRIVAL',PORT %in% c("VAIRP","VAIR","SAIRP","SAIR")) %>%
   count()
 
