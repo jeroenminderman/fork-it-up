@@ -1,46 +1,50 @@
 #### Preparation ####
 
+# Read in the processed TOURISM data from secure folder of the repository 
+tourismProcessedFile <- file.path(secureDataFolder, "OUT_PROC_ASY_ProcessedRawData_31.12.19.csv")
+tourismProcessed <- read.csv(tourismProcessedFile, header = TRUE, na.strings = c("","NA","NULL","null"))
+
 #### Table 1: Summary of overseas Migration ####
 
-Tab1_VILA <- TourismFINAL %>%
+Tab1_VILA <- tourismProcessed %>%
   group_by(PORT,ARR.DEPART,VisitorResident) %>%
   filter(PORT %in% c("VAIRP","VAIR","SAIRP","SAIR")) %>%
   count()
 
 #### Table 2: Purpose of Visit ####
 
-Tab2_POV <- TourismFINAL %>%
+Tab2_POV <- tourismProcessed %>%
   group_by(TravelPurposeClassifications) %>%
   filter(VisitorResident %in% c("Visitor")) %>%
   filter (ARR.DEPART %in% c("ARRIVAL")) %>%
   count()
 
-write.csv(Tab2_POV, file = "Tab 2_Purpose of Visit")
-
 #### Table 3: Country of Usual Residence ####
-Tab3_VistorsCUR <- TourismFINAL %>%
+
+Tab3_VistorsCUR <- tourismProcessed %>%
   filter(PORT %in% c("SAIR","SAIRP","VAIR","VAIRP"))%>%
   filter(VisitorResident %in%("Visitor"))%>%
   filter(ARR.DEPART %in%("ARRIVAL"))%>%
   group_by(GROUP) %>%
   count()
 
-
-
 #### Table 4: Residents arrival by Nationality ####
-Tab4_ResByNat<- TourismFINAL %>%
+
+Tab4_ResByNat<- tourismProcessed %>%
   group_by(RESIDENTS.BY.REGION) %>%
   filter(VisitorResident == "Resident", ARR.DEPART == 'ARRIVAL',PORT %in% c("VAIRP","VAIR","SAIRP","SAIR")) %>%
   count()
 
-#### Table 5: Average LOS ####
+#### Table 5: Average length of stay ####
 
-str(TourismFINAL$LENGTH.OF.STAY)
-str(TourismFINAL$VisitorResident)
+# Change length of stay format from integer to character
+str(tourismProcessed$LENGTH.OF.STAY)
+tourismProcessed$LENGTH.OF.STAY <- as.character(tourismStats$LENGTH.OF.STAY)
+str(tourismProcessed$VisitorResident)
 
-visitors_data <- TourismFINAL %>%
+# Filter for visiting tourists 
+visitors_data <- tourismProcessed %>%
   filter(VisitorResident == "Visitor")
-
 
 # Identify when Visitors length of stay over 120 days and correct
 LOS_threshold <- 120
@@ -50,7 +54,6 @@ visitors_data <- visitors_data %>%
            LENGTH.OF.STAY > LOS_threshold ~ 120,
            TRUE ~ LENGTH.OF.STAY
          ))
-
 
 visitors_data <- visitors_data %>%
   mutate(Towns = case_when(
@@ -75,12 +78,12 @@ Vanuatu <- data.frame(Towns,AVG_LengthOfStay)
 Tab5_AVGLOS <- rbind(AVG_LOS_VUV,Vanuatu)
 
 
-#### Table 6: Average AGE ####
+#### Table 6: Average age ####
 
 str(TourismFINAL$AGE)
 str(TourismFINAL$VisitorResident)
 
-visitor_data_age <- TourismFINAL %>%
+visitor_data_age <- tourismProcessed %>%
   filter(VisitorResident == "Visitor")
 
 
@@ -106,12 +109,11 @@ Vanuatu <- data.frame(cities, AVG_AGE)
 
 Tab6_AVGAGE <- rbind(AVG_AGE_VUV,Vanuatu)
 
-
-#### Table 7: Visitors to outer islands ####
+#### Table 7: Visitors to outer islands (working on data) ####
 
 # create subset from Main dataset #
 
-DepartureSubset <-TourismFINAL[which(TourismFINAL$ARR.DEPART=="DEPARTURE"),]
+DepartureSubset <-tourismProcessed[which(tourismProcessed$ARR.DEPART=="DEPARTURE"),]
 
 # Merge Outer Island into Departure Subset #
 FINALOuterIsland <- merge(MergeOuterIslandCodes,DepartureSubset, by="PASSPORT", all.x = TRUE )
@@ -124,16 +126,16 @@ Tab7_VisitorOuterIsland <- FINALOuterIsland %>%
 #### Table 8: Visitors usual residence arrivals by Purpose of Visit ####
 
 #grouping the purpose of visits
-POV_Tab8 <- TourismFINAL %>%
+POV_Tab8 <- tourismProcessed %>%
   mutate( POV_Groups = case_when(
-    grepl(pattern = "Bus", TourismFINAL$TravelPurposeClassifications) ~ "Business",
-    grepl(pattern = "Conf", TourismFINAL$TravelPurposeClassifications) ~ "Business",
-    grepl(pattern = "Edu", TourismFINAL$TravelPurposeClassifications) ~ "All Other",
-    grepl(pattern = "Oth", TourismFINAL$TravelPurposeClassifications) ~ "All Other",
-    grepl(pattern = "Spo", TourismFINAL$TravelPurposeClassifications) ~ "All Other",
-    grepl(pattern = "Sto", TourismFINAL$TravelPurposeClassifications) ~ "All Other",
-    grepl(pattern = "Hol", TourismFINAL$TravelPurposeClassifications) ~ "Holiday",
-    grepl(pattern = "Vis", TourismFINAL$TravelPurposeClassifications) ~ "Visitings Friends and relatives"
+    grepl(pattern = "Bus", tourismProcessed$TravelPurposeClassifications) ~ "Business",
+    grepl(pattern = "Conf", tourismProcessed$TravelPurposeClassifications) ~ "Business",
+    grepl(pattern = "Edu", tourismProcessed$TravelPurposeClassifications) ~ "All Other",
+    grepl(pattern = "Oth", tourismProcessed$TravelPurposeClassifications) ~ "All Other",
+    grepl(pattern = "Spo", tourismProcessed$TravelPurposeClassifications) ~ "All Other",
+    grepl(pattern = "Sto", tourismProcessed$TravelPurposeClassifications) ~ "All Other",
+    grepl(pattern = "Hol", tourismProcessed$TravelPurposeClassifications) ~ "Holiday",
+    grepl(pattern = "Vis", tourismProcessed$TravelPurposeClassifications) ~ "Visitings Friends and relatives"
   )) 
 
 #creating the data frame comparing visitors country of usual residence by purpose of visit
@@ -217,6 +219,6 @@ number_rows <- nrow(Tab8_UsualResByPOV)
 Tab8_UsualResByPOV[number_rows,] <- UsualResByPOV2[number_rows, ]
 Tab8_UsualResByPOV <- Tab8_UsualResByPOV[ , c(1,5, 4, 3, 2, 6)]
 
-#write.csv(UsualResByPOV, file="Table_8.csv")
+
 
 #### END ####

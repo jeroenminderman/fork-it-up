@@ -16,9 +16,6 @@ library(janitor) # Add totals row and column
 repository <- file.path(dirname(rstudioapi::getSourceEditorContext()$path), "..", "..")
 setwd(repository) # Required for file.choose() function
 
-# Load the general R functions
-source(file.path(repository, "R", "functions.R"))
-
 # Note the secure data path
 secureDataFolder <- file.path(repository, "data", "secure")
 
@@ -30,94 +27,103 @@ openDataFolder <- file.path(repository, "data", "open")
 tourismStatsFile <- file.path(secureDataFolder, "SEC_RAW_ASY_RawDataAndReferenceTables_31-12-19.csv")
 tourismStats <- read.csv(tourismStatsFile, header = TRUE, na.strings = c("","NA","NULL","null"))
 
-#### Data Cleaning (Missing Values, Duplicates) ####
-## TourismStats <- read.csv(tourismStatsFile, Header = TRUE, na.strings=c ("","NA","NULL", "null"))
+#### Explore the extent of missing data ####
 
 # count the missing values
-numberMissing <- apply(TourismFINAL, MARGIN=2,
+numberMissing <- apply(tourismStats, MARGIN=2,
                        FUN=function(columnValues){
                          return(sum(is.na(columnValues)))
                        })
-numberMissing
-
 
 # Convert the counts to a proportion
-proportionMissing <- numberMissing / nrow(TourismFINAL)
+proportionMissing <- numberMissing / nrow(tourismStats)
 
 # Check for columns with high amounts of NA values
 colsWithManyMissingValues <- names(proportionMissing)[proportionMissing > 0.1]
 for(column in colsWithManyMissingValues){
-  warning(paste0("Large amounts of missing data identified in \"", column, "\" column. View with: \n\tView(TourismFINAL[is.na(TourismFINAL[, \"",  column, "\"]), ])"))
+  warning(paste0("Large amounts of missing data identified in \"", column, "\" column. View with: \n\tView(tourismStats[is.na(tourismStats[, \"",  column, "\"]), ])"))
 }
 
-# Remove duplicated rows from the tourism statistics data
+#### Clean and process the latest month's data ####
 
-duplicatedRows <- duplicated(TourismFINAL) 
-TourismFINALNoDups <- TourismFINAL[duplicatedRows == FALSE, ]
+# Change flight date format from character to date
+tourismStats$FLIGHT.DATE <- as.character(tourismStats$FLIGHT.DATE)
+tourismStats$FLIGHT.DATE <- as.Date(tourismStats$FLIGHT.DATE, format = "%d/%m/%Y")
+#tourismFINALNoDups$BIRTHDATE <- as.Date(tourismFINALNoDups$BIRTHDATE, tryFormats = c("%Y-%m-%d", "%Y/%m/%d"))
 
-#### CALCULATE THE AGE ####
-# Take two dates and differentiate from one another
-TourismFINAL<- tourismStats
-str(TourismFINAL$FLIGHT.DATE)
-str(TourismFINAL$BIRTHDATE)
+# Change birth date format from character to date
+tourismStats$BIRTHDATE <- as.character(tourismStats$BIRTHDATE)
+tourismStats$BIRTHDATE <- as.Date(tourismStats$BIRTHDATE, format = "%d/%m/%Y")
 
-TourismFINAL$FLIGHT.DATE <- as.character(TourismFINAL$FLIGHT.DATE)
-str(TourismFINAL$FLIGHT.DATE)
-
-TourismFINAL$BIRTHDATE <- as.character(TourismFINAL$BIRTHDATE)
-str(TourismFINAL$BIRTHDATE)
-
-# Change date formats from character to Dates
-TourismFINAL$FLIGHT.DATE <- as.Date(TourismFINAL$FLIGHT.DATE, format = "%d/%m/%Y")
-TourismFINAL$BIRTHDATE <- as.Date(TourismFINAL$BIRTHDATE, format = "%d/%m/%Y")
+# Change intended depature date format from character to date
+tourismStats$INTENDED.DEP.DATE <- as.character(tourismStats$INTENDED.DEP.DATE)
+tourismStats$INTENDED.DEP.DATE <- as.Date(tourismStats$INTENDED.DEP.DATE,  format = "%d/%m/%Y")
 
 # Check structure after changing formats
-str(TourismFINAL$FLIGHT.DATE)
-str(TourismFINAL$BIRTHDATE)
+str(tourismStats$FLIGHT.DATE)
+str(tourismStats$BIRTHDATE)
+str(tourismStats$INTENDED.DEP.DATE)
+
+# Subsitute values for returning residents in empty spaces 
+tourismStats$TravelPurpose <- as.character(tourismStats$TravelPurpose)
+tourismStats$TravelPurpose[which(is.na(tourismStats$TravelPurpose))] <- "6. Returning Residents"
+
+# Remove duplicated rows from the tourism statistics data
+duplicatedRows <- duplicated(tourismStats) 
+tourismFINALNoDups <- tourismStats[duplicatedRows == FALSE, ]
+
+#### Calculate the age of passengers ####
 
 ### CALCULATE AGE ###
-TourismFINAL$AGE <- as.numeric(difftime(TourismFINAL$FLIGHT.DATE, TourismFINAL$BIRTHDATE, unit = "weeks"))/52.25
+tourismFINALNoDups$AGE <- as.numeric(difftime(tourismFINALNoDups$FLIGHT.DATE, tourismFINALNoDups$BIRTHDATE, unit = "weeks"))/52.25
+tourismFINALNoDups$AGE<- trunc(tourismFINALNoDups$AGE) # Extract age of passengers
 
-# Round of Age to no decimal place
-TourismFINAL$AGE = round(TourismFINAL$AGE, digits = 0)
+#### Calculate length of stay of passengers ####
 
-TourismFINAL$AGE<- trunc(TourismFINAL$AGE)
+# Calculate number of days staying
+tourismFINALNoDups$LENGTH.OF.STAY <- as.numeric(tourismFINALNoDups$INTENDED.DEP.DATE - tourismFINALNoDups$FLIGHT.DATE, unit = "days")
+tourismFINALNoDups$INTENDED.DEP.DATE = round(tourismFINALNoDups$INTENDED.DEP.DATE, digits = 0)
 
+#### Extract the Year, Month, and Day as separate columns ####
 
+# Create new columns for dates
+tourismFINALNoDups$Year <- format(tourismFINALNoDups$FLIGHT.DATE, format= "%Y")
+tourismFINALNoDups$Month <- format(tourismFINALNoDups$FLIGHT.DATE, format= "%B")
+tourismFINALNoDups$Day <- format(tourismFINALNoDups$FLIGHT.DATE, format= "%d")
 
+#### Merge in classification tables ####
 
-#### Calculate LOS ####
-TourismFINAL$INTENDED.DEP.DATE <- as.Date(TourismFINAL$INTENDED.DEP.DATE,  format = "%d/%m/%Y")
-TourismFINAL$LENGTH.OF.STAY <- as.numeric(TourismFINAL$INTENDED.DEP.DATE - TourismFINAL$FLIGHT.DATE, unit = "days")
-TourismFINAL$INTENDED.DEP.DATE = round(TourismFINAL$INTENDED.DEP.DATE, digits = 0)
+# Read in the vistors classifications into data frame
+countryCodesByVisitors <- file.path(openDataFolder, "CountryCodes_VisByNat.csv")
+countryVisitors <- read.csv(countryCodesByVisitors, header = TRUE, na.strings = c("","NA","NULL","null"))
+tourismMergedWithClassifications <- merge(tourismFINALNoDups, countryVisitors, by="COUNTRY.OF.RESIDENCE", all.x=TRUE)
 
+# Read in the residents classifications into data frame
+countryCodesByResidents <- file.path(openDataFolder, "CountryCodes_ResbyNat.csv")
+countryResidents <- read.csv(countryCodesByResidents, header = TRUE, na.strings = c("","NA","NULL","null"))
+tourismMergedWithClassifications <- merge(tourismMergedWithClassifications, countryResidents, by="COUNTRY.OF.RESIDENCE", all.x=TRUE)
 
+# Read in the purpose of visit classifications into data frame
+travelPurposeByCodes <-file.path(openDataFolder, "PurposeOfVisitCodes.csv")
+travelPurpose <- read.csv(travelPurposeByCodes, header = TRUE, na.strings = c("", "NA","NULL","null"))
+travelPurpose$TravelPurpose <- as.character(travelPurpose$TravelPurpose)
+travelPurpose$TravelPurpose[which(is.na(travelPurpose$TravelPurpose))] <- "6. Returning Residents"
+tourismMergedWithClassifications <- merge(tourismMergedWithClassifications, travelPurpose, by="TravelPurpose", all.x=TRUE)
+#travelPurpose$TravelPurpose <- as.character(travelPurpose$TravelPurpose)
+#travelPurpose$TravelPurpose[which(is.na(travelPurpose$TravelPurpose))] <- "6. Returning Residents"
 
+# Read in the outerisland travel classifications into data frame (have to get this data from Air Vanuatu)
+outerIslandByCodes <- file.path(openDataFolder, "tblIsland.csv")
+outerIsland <- read.csv(outerIslandByCodes, header = TRUE, na.strings = c("", "NA","NULL","null"))
+#tourismMergedWithClassifications <- merge(tourismMergedWithClassifications, outerIsland, by="IslandName", all.x = TRUE)
+#VisitorOuterIsland <- file.path(openDataFolder, "Departure_OuterIslands.csv")
+#VisitorsOuterIslandComplete <- read.csv(VisitorOuterIsland, header = TRUE, na.strings = c("", "NA","NULL","null"))
 
-#Read in the classifications data from open folder of the repository
-CountryCodesByVisitors <- file.path(openDataFolder, "CountryCodes_VisByNat.csv")
-CountryCodesVisitors <- read.csv(CountryCodesByVisitors, header = TRUE, na.strings = c("","NA","NULL","null"))
+#### Finish ####
 
-CountryCodesByResidents <- file.path(openDataFolder, "CountryCodes_ResbyNat.csv")
-CountryCodesResidents <- read.csv(CountryCodesByResidents, header = TRUE, na.strings = c("","NA","NULL","null"))
+# Make copy of latest month's processed data
+processedTourismStats <- tourismMergedWithClassifications
 
-TravelPurposeByCodes <-file.path(openDataFolder, "PurposeOfVisitCodes.csv")
-TravelPurposeCodes <- read.csv(TravelPurposeByCodes, header = TRUE, na.strings = c("", "NA","NULL","null"))
-
-OuterIslandByCodes <- file.path(openDataFolder, "tblIsland.csv")
-OuterIslandCodes <- read.csv(OuterIslandByCodes, header = TRUE, na.strings = c("", "NA","NULL","null"))
-
-VisitorOuterIsland <- file.path(openDataFolder, "Departure_OuterIslands.csv")
-VisitorsOuterIslandComplete <- read.csv(VisitorOuterIsland, header = TRUE, na.strings = c("", "NA","NULL","null"))
-
-#### Merge classifications table with the tourism dataset ####
-# Fill NA in POV with "Returning Residents" #
-MergedResidentsClassifications <- merge(tourismStats, CountryCodesResidents, by="COUNTRY.OF.RESIDENCE", all.x=TRUE)
-MergedFinalTourism <- merge(MergedResidentsClassifications, CountryCodesVisitors, by="COUNTRY.OF.RESIDENCE", all.x=TRUE)
-
-str(MergedFinalTourism$TravelPurpose)
-MergedFinalTourism$TravelPurpose <- as.character(MergedFinalTourism$TravelPurpose)
-MergedFinalTourism$TravelPurpose[which(is.na(MergedFinalTourism$TravelPurpose))] <- "6. Returning Residents"
-TourismFINAL <- merge(MergedFinalTourism, TravelPurposeCodes, by="TravelPurpose", all.x=TRUE)
-
-MergeOuterIslandCodes <- merge(OuterIslandCodes, VisitorsOuterIslandComplete, by="IslandName", all.x = TRUE)
+# Create csv of last months processed data
+outputDataFile <- file.path(secureDataFolder, paste("OUT_PROC_ASY_ProcessedRawData_31.12.19.csv"))
+write.csv(processedTourismStats, outputDataFile)
