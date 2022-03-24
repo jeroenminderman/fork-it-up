@@ -64,7 +64,7 @@ str(tourismStats$FLIGHT.DATE)
 str(tourismStats$BIRTHDATE)
 str(tourismStats$INTENDED.DEP.DATE)
 
-# Subsitute values for returning residents in empty spaces 
+# Substitute values for returning residents in empty spaces 
 tourismStats$TravelPurpose <- as.character(tourismStats$TravelPurpose)
 tourismStats$TravelPurpose[which(is.na(tourismStats$TravelPurpose))] <- "6. Returning Residents"
 
