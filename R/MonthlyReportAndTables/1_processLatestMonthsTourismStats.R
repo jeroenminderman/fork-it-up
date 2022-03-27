@@ -120,7 +120,7 @@ Tab2_POV <- TourismFINAL %>%
   filter (ARR.DEPART %in% c("ARRIVAL")) %>%
   count()
 
-write.csv(Tab2_POV, file = "Tab 2_Purpose of Visit")
+#write.csv(Tab2_POV, file = "Tab 2_Purpose of Visit.csv")
 
 #### Table 3: Country of Usual Residence ####
 Tab3_VistorsCUR <- TourismFINAL %>%
@@ -137,6 +137,7 @@ Tab4_ResByNat<- TourismFINAL %>%
   group_by(PORT,RESIDENTS.BY.REGION) %>%
   filter(VisitorResident == "Resident", ARR.DEPART == 'ARRIVAL',PORT %in% c("VAIRP","VAIR","SAIRP","SAIR")) %>%
   count()
+
 
 #### Table 5: Average LOS ####
 
@@ -178,7 +179,6 @@ AVG_LengthOfStay <- 12
 Vanuatu <- data.frame(Towns,AVG_LengthOfStay)
 
 Tab5_AVGLOS <- rbind(AVG_LOS_VUV,Vanuatu)
-
 
 #### Table 6: Average AGE ####
 
@@ -322,6 +322,5 @@ number_rows <- nrow(Tab8_UsualResByPOV)
 Tab8_UsualResByPOV[number_rows,] <- UsualResByPOV2[number_rows, ]
 Tab8_UsualResByPOV <- Tab8_UsualResByPOV[ , c(1,5, 4, 3, 2, 6)]
 
-#write.csv(UsualResByPOV, file="Table_8.csv")
-
 #### END ####
+
