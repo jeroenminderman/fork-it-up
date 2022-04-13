@@ -1,8 +1,18 @@
+## Set up ##
+
+# Clear the environment
+rm(list = ls())
+
+
 
 library(tidyverse) # for processing data
 library(tmap) # for building map
 library(ggplot2) # for building plots
 library(cowplot) # for combining plots into a grid
+library(sf) # for working with spatial data
+
+# setting font for plots
+windowsFonts(Times = windowsFont("Times New Roman"))
 
 ## Data import ##
 
@@ -10,10 +20,10 @@ library(cowplot) # for combining plots into a grid
 repository <- getwd()
 
 # define secure data folder path
-secureDataFolder <- file.path(repository, "data", "secure")
+outputsFolder <- file.path(repository, "outputs")
 
 # Read in the processed tourism data from secure folder of the repository 
-tourismCleanFile <- file.path(secureDataFolder, "OUT_PROC_Clean_Example.csv")
+tourismCleanFile <- file.path(outputsFolder, "OUT_PROC_Clean_Example.csv")
 tourismCleaned <- read_csv(tourismCleanFile,  na= c("","NA","NULL","null"))
 
 # importing data for country polygons
@@ -28,7 +38,7 @@ country_arrivals_df <-
   group_by(citizenship, gender) %>%
   filter(arr_depart == 'ARRIVAL', # arrivals only
          country_or_area != 'Vanuatu') %>% # removing Vanuatu 
-  count() %>%
+  count() %>% # count all rows
   mutate(n = as.numeric(n)) %>%
   spread(gender, n) %>%
   mutate(`F` = replace_na(`F`, 0),
@@ -61,10 +71,21 @@ m1 <-
     "total",
     palette = 'RdPu',
     title = "",
-    breaks = c(0, 500, 1000, 1500, 2000, 3000, 7000)
+    breaks = c(0, 500, 1000, 1500, 2000, 3000, 7000) # change how data is broken up
   ) +
-  tm_style("natural", earth.boundary = c(-180, -87, 180, 87), inner.margins = .05) +
-  tm_layout(title = 'Visitors by country \nof citizenship') 
+  tm_style("natural") + # makes globe blue
+  tm_layout(title = 'Visitors by country of\ncitizenship',
+            title.size = 1.3,
+            title.fontface = 'bold',
+            title.position = c('left', 'top'), 
+            fontfamily = 'serif', # font - for arial etc use 'sans' or courier would be 'monospace'
+            
+            frame = FALSE,
+            inner.margins = c(0.1,0.05,0.1,0.05), # earth margins
+            outer.margins = c(0,0,0,0), # outside frame
+            
+            legend.bg.color = 'transparent',
+            legend.frame = FALSE) 
 
 
 # dataframe to breakdown top ten countries by sex
@@ -81,31 +102,30 @@ p1 <-
   geom_bar(data = country_arrivals_sex_df,
            aes(
              x = visits,
-             y = reorder(citizenship,-total),
+             y = reorder(citizenship,-total), # ordering by total value
              fill = sex
            ),
            stat = 'identity') +
   scale_fill_manual(values = c('orchid4', 'darkslategrey')) +
   scale_x_continuous(
     limits = c(-3500, 3500),
-    labels = c('3,500', '2,500', '0', '2,500', '3,500')
+    labels = c('3,500', '2,500', '0', '2,500', '3,500') # changing labels to hide that some data made negative for plot
   ) +
   labs(x = 'number of visits',
        y = NULL,
        fill = NULL,
        title = 'The number of visits broken down by sex for the top ten countries.') +
-  theme_classic() +
-  theme(legend.position = 'bottom')
+  theme_classic() 
 
 
 
 
 ## Age and sex breakdown ##
 
-# for bin - connected to tags i.e. if you change a value change in tags below
+# for bin - connected to tags i.e. if you change a value change same in tags below
 breaks <- c(0, 5, 10, 20, 40, 60, 80, 100)
 
-# for bin - connected to breaks 
+# for bin - connected to breaks update if change breaks
 tags <- c("0-5","5-10", "10-20", "20-40", "40-60", "60-80", "80-100")
 
 
@@ -116,10 +136,11 @@ age_df <-
          country_or_area != 'Vanuatu') %>%
   group_by(gender) %>%
   filter(!is.na(age_clean)) %>%
-  mutate(bin = cut(age_clean, breaks=breaks, 
-                   include.lowest=TRUE, 
-                   right=FALSE, 
-                   labels=tags)) %>%
+  mutate(bin = cut(age_clean, 
+                   breaks = breaks, 
+                   include.lowest = TRUE, 
+                   right = FALSE, 
+                   labels = tags)) %>%
   ungroup() %>%
   group_by(gender, bin) %>% 
   count() %>%
@@ -148,15 +169,15 @@ p2 <-
     limits = c(-2500, 2500),
     labels = c('2,500', '2,000', '1,000', '0', '1,000', '2,000', '2,500')
   ) +
+  guides(shape = guide_legend(override.aes = list(size = 3)),
+         fill = guide_legend(override.aes = list(size = 3))) +
   labs(
     x = 'number of visits',
     y = NULL,
     fil = NULL,
-    title = 'Age of visitors broken down by sex',
-    subtitle = 'Note that the bins have been selected arbitrarily and may need changed to be statistically valid.'
+    title = 'Age of visitors broken down by sex'
   ) +
-  theme_classic() +
-  theme(legend.position = 'bottom')
+  theme_classic() 
 
 
 # top ten countries based on citizenship of visitors
@@ -244,22 +265,40 @@ p3 <-
   scale_y_discrete(expand = c(0, 0)) +
   scale_x_continuous(expand = c(0, 0),
                      labels = x_labs) +
+  guides(shape = guide_legend(override.aes = list(size = 3)),
+         fill = guide_legend(override.aes = list(size = 3))) +
   labs(x = NULL,
        y = NULL,
-       fill = 'age group',
-       title = 'Distribution of visitors by age group for each country of citizenship') +
-  theme_classic() +
-  theme(legend.position = 'bottom')
+       fill = 'age\ngroup',
+       title = 'Distribution of visitors by age group for \ntop ten country of citizenship') +
+  theme_classic() 
 
 
 
 
 ## Combining plots together ##
 
-
 map1 <- tmap_grob(m1) # needed to include map in grid
 
-bottomrow <- plot_grid(p1, p2) #joining bottom plots
+# theme for plot
+### I would normally put this right at the start under functions HOWEVER this theme is just for the arranging of the plots 
+### as the text size is smaller than if saving as individual .png or if want to knit in markdown
+### so for that reason it's here as intention is a secondary plot_theme would be used!
 
-plot_grid(map1, bottomrow, nrow = 2, rel_heights = c(3.5,2), rel_widths = c(3,1)) 
+plot_theme  <- theme(legend.position = 'bottom',
+                     plot.title = element_text(size = 12, face = 'bold'),
+                     legend.text = element_text(size = 8),
+                     legend.title = element_text(size = 10),
+                     text = element_text(size = 8, family = 'Times'))
+
+p3 <- p3 + plot_theme # readying plot for joining into grid
+
+p2 <- p2 + plot_theme # readying plot for joining into grid
+
+bottomrow <- plot_grid(p2, p3) #joining bottom plots
+
+# building grid - this needs some adjustment as too much whitespace at the minute
+plot_grid(map1, bottomrow, nrow = 2, rel_heights = c(3.5,2.5))
+
+
           
