@@ -2,6 +2,7 @@
 
 ### Some change
 ### Another change
+### And yet another
 
 # Clear the environment
 rm(list = ls())
@@ -25,7 +26,7 @@ secureDataFolder <- file.path(repository, "data", "secure")
 # Note the open data path
 openDataFolder <- file.path(repository, "data", "open")
 
-# Read in the raw TOURISM data from secure folder of the repository 
+# Read in the raw TOURISM data from secure folder of the repository
 # Note that spaces in column names have been automatically replaced with "."s
 tourismStatsFile <- file.path(secureDataFolder, "SEC_RAW_ASY_RawDataAndReferenceTables_31-12-19.csv")
 tourismStats <- read.csv(tourismStatsFile, header = TRUE, na.strings = c("","NA","NULL","null"))
@@ -67,12 +68,12 @@ str(tourismStats$FLIGHT.DATE)
 str(tourismStats$BIRTHDATE)
 str(tourismStats$INTENDED.DEP.DATE)
 
-# Substitute values for returning residents in empty spaces 
+# Substitute values for returning residents in empty spaces
 tourismStats$TravelPurpose <- as.character(tourismStats$TravelPurpose)
 tourismStats$TravelPurpose[which(is.na(tourismStats$TravelPurpose))] <- "6. Returning Residents"
 
 # Remove duplicated rows from the tourism statistics data
-duplicatedRows <- duplicated(tourismStats) 
+duplicatedRows <- duplicated(tourismStats)
 tourismFINALNoDups <- tourismStats[duplicatedRows == FALSE, ]
 
 #### Calculate the age of passengers ####
